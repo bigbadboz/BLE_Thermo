@@ -16,12 +16,13 @@ All text above, and the splash screen below must be included in any redistributi
 // This version uses the internal data queing so you can treat it like Serial (kinda)!
 
 #include <SPI.h>
-#include "Adafruit_BLE_UART.h"
+#include <Adafruit_BLE_UART.h>
 #include <Snooze.h>
+
 
 /*** Must be global ***/
 SnoozeBlock config;
-
+float tempPast = 0;
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
@@ -37,25 +38,27 @@ aci_evt_opcode_t status;
     /**************************************************************************/
 void setup(void)
 { 
-  pinMode(LED_BUILTIN, OUTPUT);
+  
   Serial.begin(38400);
   while(!Serial); // Leonardo/Micro should wait for serial init
   Serial.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
 
-  //BTLEserial.setDeviceName("BBQTemp"); /* 7 characters max! */
+  BTLEserial.setDeviceName("BBQTemp"); /* 7 characters max! */
 
-  pinMode(ADAFRUITBLE_RDY, INPUT_PULLUP);
-  config.pinMode(ADAFRUITBLE_RDY,INPUT_PULLUP , FALLING);
+  //pinMode(ADAFRUITBLE_RDY, INPUT_PULLUP);
+  //config.pinMode(ADAFRUITBLE_RDY,INPUT_PULLUP,RISING);
   BTLEserial.begin();
   //config.setTimer(10000);
 
+  
   //Get the radio advertising before we sleep
-  while (status != ACI_EVT_DEVICE_STARTED) {
-   status = BTLEserial.getState();
-   BTLEserial.pollACI();
-  }
-  Serial.println("BLE started");
-}
+  // while (status != ACI_EVT_DEVICE_STARTED) {
+  //  status = BTLEserial.getState();
+  //  BTLEserial.pollACI();
+  //  Serial.println("BLE started");
+  //}
+  
+ }
 
 /**************************************************************************/
 /*!
@@ -66,6 +69,7 @@ aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
 void loop()
 { 
+
   //int tempMinimum = 200;
   //int tempOptimal = 275;
   //int tempMax = 350;
@@ -73,11 +77,12 @@ void loop()
   //int temptooHigh = 0;
   //int tempJustRight = 0; 
   int isNegative = 0;
+
   float tempSensor = analogRead(A0) * (3.3 / 1023.0);
-  float tempProcessed = ( (tempSensor - 1.25) / 0.005 ) + 4.0 ;
-  if(tempProcessed < 0){
+  float tempNow = ( (tempSensor - 1.25) / 0.005 ) ;
+  if(tempNow < 0){
     isNegative = 1;
-    tempProcessed = tempProcessed * - 1.0;
+    tempNow = tempNow * - 1.0;
   }
   // if (digitalRead(ADAFRUITBLE_RDY) == HIGH) {
   //   Serial.println("SLEEP");
@@ -117,26 +122,24 @@ void loop()
       Serial.print(c);
     }
 
-
-    char buffer[5];
-    unsigned char sendbuffer[10];
-    String s = dtostrf(tempProcessed,5,2,buffer);
-    if(isNegative){
-      s = "-" + s;
-    }
-      // We need to convert the line to bytes, no more than 20 at this time
+    if(abs(tempNow - tempPast) > 2.0 ){
+      char buffer[5];
+      unsigned char sendbuffer[10];
+      String s = dtostrf(tempNow,5,2,buffer);
+      if(isNegative){
+        s = "-" + s;
+      }
       s.getBytes(sendbuffer, 5);
-
       char sendbuffersize = min(5, s.length());
-
-
       // write the data
       BTLEserial.write(sendbuffer, sendbuffersize);
       //Snooze.sleep(config);
       // digitalWrite(LED_BUILTIN, HIGH);
       // delay(1000);
       // digitalWrite(LED_BUILTIN, LOW);
+      tempPast = tempNow;
+    }
 
-
+    
   }
 }
