@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.os.Vibrator;
 public class MainActivity extends Activity {
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
     protected Vibrator vibrate;
     long[] twice = { 0, 100, 400, 100 };
     long[] thrice = { 0, 100, 400, 100, 400, 100 };
+    private ScrollView scrollView;
     private Button reconnectButton;
     private Button resetButton;
     private TextView messages;
@@ -110,7 +112,8 @@ public class MainActivity extends Activity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-            writeLine("Received: " + characteristic.getStringValue(0));
+            //writeLine("Received: " + characteristic.getStringValue(0));
+
             temperature = characteristic.getStringValue(0) + " C";
             temperatureFRaw = cToF(characteristic.getStringValue(0));
             temperatureF = cToF(characteristic.getStringValue(0)) + " F";
@@ -118,7 +121,7 @@ public class MainActivity extends Activity {
                 maxTemp = Integer.valueOf(temperatureFRaw);
                 minTemp = Integer.valueOf(temperatureFRaw);
             }
-
+            updateTemp();
         }
     };
 
@@ -155,6 +158,7 @@ public class MainActivity extends Activity {
         adapter = BluetoothAdapter.getDefaultAdapter();
         editMaxTemp = (TextView)findViewById(R.id.maxTemp);
         editMinTemp = (TextView)findViewById(R.id.minTemp);
+        scrollView = (ScrollView)findViewById(R.id.scrollView);
 
         reconnectButton.setOnClickListener(
                 new Button.OnClickListener() {
@@ -212,17 +216,10 @@ public class MainActivity extends Activity {
         minTemp = Integer.valueOf(editMinTemp.getText().toString());
         vibrate.vibrate(100);
     }
-
-    // Write some text to the messages text view.
-    // Care is taken to do this on the main UI thread so writeLine can be called
-    // from any thread (like the BTLE callback).
-    private void writeLine(final CharSequence text) {
+    private void updateTemp(){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                messages.append(text);
-                messages.append("\n");
                 displayTemp.setText(temperature);
                 displayTempF.setText(temperatureF);
                 if(Integer.valueOf(temperatureFRaw) < minTemp ){
@@ -242,6 +239,20 @@ public class MainActivity extends Activity {
                     displayTempF.setTextColor(Color.BLACK);
                     displayTemp.setTextColor(Color.BLACK);
                 }
+            }
+        });
+    }
+    // Write some text to the messages text view.
+    // Care is taken to do this on the main UI thread so writeLine can be called
+    // from any thread (like the BTLE callback).
+    private void writeLine(final CharSequence text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.fullScroll(View.FOCUS_DOWN);
+                messages.append(text);
+                messages.append("\n");
+
             }
         });
     }

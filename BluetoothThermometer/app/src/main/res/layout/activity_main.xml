@@ -78,7 +78,7 @@
         android:text="Reconnect"
         android:id="@+id/reconnect"
         android:layout_above="@+id/scrollView"
-        android:layout_alignEnd="@+id/send" />
+        android:layout_alignStart="@+id/send" />
 
 
     <TextView

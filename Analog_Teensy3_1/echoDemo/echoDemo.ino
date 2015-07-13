@@ -154,11 +154,11 @@ void loop()
       isNegative = 0;
       tempSensor = analogRead(A0);
       tempSensor = analogRead(A0) * (3.3 / 1023.0);
-      tempNow = ( (tempSensor - 1.25) / 0.005 ) ;
+      tempNow = ( (tempSensor - 1.25) / 0.005 );
       if(tempNow < 0.0){
         isNegative = 1;
         tempNow = abs(tempNow);
-      }
+      } 
 
       char buffer[5];
       unsigned char sendbuffer[10];
