@@ -30,7 +30,9 @@ public class MainActivity extends Activity {
     public static UUID CLIENT_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     // UI elements
-
+    protected Vibrator vibrate;
+    long[] twice = { 0, 100, 400, 100 };
+    long[] thrice = { 0, 100, 400, 100, 400, 100 };
     private Button reconnectButton;
     private Button resetButton;
     private TextView messages;
@@ -143,7 +145,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        vibrate = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         // Grab references to UI elements.
         messages = (TextView) findViewById(R.id.messages);
         displayTemp = (TextView)findViewById(R.id.temperature);
@@ -162,7 +164,7 @@ public class MainActivity extends Activity {
                 }
         );
 
-        reconnectButton.setOnClickListener(
+        resetButton.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
                         resetTemp();
@@ -196,7 +198,11 @@ public class MainActivity extends Activity {
     }
 
     public void resetTemp(){
+
         isTempSet = false;
+        maxTemp = Integer.valueOf(temperatureFRaw);
+        minTemp = Integer.valueOf(temperatureFRaw);
+        vibrate.vibrate(100);
     }
 
     // Handler for mouse click on the send button.
@@ -204,6 +210,7 @@ public class MainActivity extends Activity {
         isTempSet = true;
         maxTemp = Integer.valueOf(editMaxTemp.getText().toString());
         minTemp = Integer.valueOf(editMinTemp.getText().toString());
+        vibrate.vibrate(100);
     }
 
     // Write some text to the messages text view.
@@ -213,6 +220,7 @@ public class MainActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
                 messages.append(text);
                 messages.append("\n");
                 displayTemp.setText(temperature);
@@ -220,6 +228,7 @@ public class MainActivity extends Activity {
                 if(Integer.valueOf(temperatureFRaw) < minTemp ){
                     displayTempF.setTextColor(Color.BLUE);
                     displayTemp.setTextColor(Color.BLUE);
+                    vibrate.vibrate(500);
 
                     // Vibrate for 500 milliseconds
                     //v.vibrate(500);
@@ -227,8 +236,9 @@ public class MainActivity extends Activity {
                 else if(Integer.valueOf(temperatureFRaw) > maxTemp ){
                     displayTempF.setTextColor(Color.RED);
                     displayTemp.setTextColor(Color.RED );
+                    vibrate.vibrate(500);
                 }
-                else {
+                else if(!isTempSet) {
                     displayTempF.setTextColor(Color.BLACK);
                     displayTemp.setTextColor(Color.BLACK);
                 }
