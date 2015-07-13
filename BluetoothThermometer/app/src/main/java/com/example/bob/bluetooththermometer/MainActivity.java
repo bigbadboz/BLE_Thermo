@@ -42,8 +42,10 @@ public class MainActivity extends Activity {
     private Button reconnectButton;
     private TextView messages;
     private TextView displayTemp;
+    private TextView displayTempF;
     private EditText input;
     private String temperature;
+    private String temperatureF;
     // BTLE state
     private BluetoothAdapter adapter;
     private BluetoothGatt gatt;
@@ -110,6 +112,7 @@ public class MainActivity extends Activity {
             super.onCharacteristicChanged(gatt, characteristic);
             writeLine("Received: " + characteristic.getStringValue(0));
             temperature = characteristic.getStringValue(0) + " C";
+            temperatureF = cToF(characteristic.getStringValue(0)) + " F";
 
         }
     };
@@ -142,6 +145,7 @@ public class MainActivity extends Activity {
         messages = (TextView) findViewById(R.id.messages);
         input = (EditText) findViewById(R.id.input);
         displayTemp = (TextView)findViewById(R.id.temperature);
+        displayTempF = (TextView)findViewById(R.id.temperatureF);
         reconnectButton = (Button) findViewById(R.id.reconnect);
         adapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -205,6 +209,7 @@ public class MainActivity extends Activity {
                 messages.append(text);
                 messages.append("\n");
                 displayTemp.setText(temperature);
+                displayTempF.setText(temperatureF);
             }
         });
     }
@@ -278,7 +283,12 @@ public class MainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+    private String cToF(String celcius){
+        float f = Float.valueOf(celcius);
+        double f1 = ( 1.8 *  f )  + 32;
+        int r =  (int) f1;
+        return String.valueOf((r));
 
-
+    }
 
 }

@@ -33,7 +33,7 @@ SnoozeBlock config;
 int tempOptimal = 0;
 int temptooLow = tempOptimal - 50 ;
 int temptooHigh = tempOptimal + 50;
-Metro serialMetro = Metro(10000);
+Metro serialMetro = Metro(1000);
 char readBuffer[3];
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
@@ -52,9 +52,9 @@ aci_evt_opcode_t status;
 void setup(void)
 { 
   
-  Serial1.begin(9600);
+  //Serial1.begin(9600);
   //while(!Serial); // Leonardo/Micro should wait for serial init
-  Serial1.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
+  //Serial1.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
 
   BTLEserial.setDeviceName("BBQTemp"); /* 7 characters max! */
 
@@ -99,10 +99,10 @@ void loop()
     if (status == ACI_EVT_DEVICE_STARTED) {
       Serial1.println(F("* Advertising started"));
       if (digitalRead(3) == HIGH) {
-      Serial1.println("SLEEP_started");
-      Serial1.flush();
-      Snooze.sleep(config);
-      Serial1.println("WAKE_started");
+      //Serial1.println("SLEEP_started");
+      //Serial1.flush();
+      //Snooze.sleep(config);
+      //Serial1.println("WAKE_started");
       }
   
       //Serial.println(F("*sleeping"));
@@ -111,10 +111,10 @@ void loop()
 
     }
     if (status == ACI_EVT_CONNECTED) {
-      Serial1.println(F("* Connected!"));
+      //Serial1.println(F("* Connected!"));
     }
     if (status == ACI_EVT_DISCONNECTED) {
-      Serial1.println(F("* Disconnected or advertising timed out"));
+     // Serial1.println(F("* Disconnected or advertising timed out"));
       
      // if (digitalRead(3) == HIGH) {
       // Serial1.println("SLEEP_Disconnected");
@@ -151,17 +151,18 @@ void loop()
 
     //Serial.print(tempOptimal);
     if (serialMetro.check() == 1) { 
+      isNegative = 0;
       tempSensor = analogRead(A0);
       tempSensor = analogRead(A0) * (3.3 / 1023.0);
       tempNow = ( (tempSensor - 1.25) / 0.005 ) ;
-      if(tempNow < 0){
+      if(tempNow < 0.0){
         isNegative = 1;
-        tempNow = tempNow * - 1.0;
+        tempNow = abs(tempNow);
       }
 
       char buffer[5];
       unsigned char sendbuffer[10];
-      s = dtostrf(tempNow,5,2,buffer);
+      s = dtostrf(tempNow,4,1,buffer);
       if(isNegative){
         s = "-" + s;
       }

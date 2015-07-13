@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="Set"
         android:onClick="sendClick"
-        android:layout_marginTop="34dp"
+        android:layout_marginTop="19dp"
         android:layout_below="@+id/input"
         android:layout_centerHorizontal="true" />
 
@@ -39,16 +39,14 @@
         android:text="s"
         android:textSize="90sp"
         android:id="@+id/temperature"
-        android:layout_marginTop="39dp"
+        android:layout_marginTop="20dp"
         android:layout_below="@+id/send"
         android:layout_centerHorizontal="true" />
-        android:layout_toStartOf="@+id/stopwatchbutton" />
 
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:ems="10"
         android:id="@+id/input"
         android:hint="Optimum Temperature"
@@ -68,23 +66,18 @@
         android:layout_alignParentStart="true"
         android:layout_toStartOf="@+id/send" />
 
-    <Chronometer
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/chronometer"
-        android:textSize="45sp"
-        android:layout_marginTop="64dp"
-        android:layout_below="@+id/temperature"
-        android:layout_centerHorizontal="true" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start/Stop"
-        android:id="@+id/stopwatchbutton"
-        android:layout_above="@+id/scrollView"
-        android:layout_toEndOf="@+id/chronometer" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="F"
+        android:textSize="60sp"
+        android:id="@+id/temperatureF"
+        android:layout_marginTop="24dp"
+        android:layout_below="@+id/temperature"
+        android:layout_centerHorizontal="true"
+        android:layout_alignEnd="@+id/temperature" />
 
 
 </RelativeLayout>
