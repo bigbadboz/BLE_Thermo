@@ -2,7 +2,6 @@ package com.example.bob.bluetooththermometer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,21 +13,13 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import android.os.Vibrator;
 public class MainActivity extends Activity {
 
     // UUIDs for UAT service and associated characteristics.
@@ -39,13 +30,20 @@ public class MainActivity extends Activity {
     public static UUID CLIENT_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     // UI elements
+
     private Button reconnectButton;
+    private Button resetButton;
     private TextView messages;
     private TextView displayTemp;
     private TextView displayTempF;
-    private EditText input;
-    private String temperature;
-    private String temperatureF;
+    private TextView editMinTemp;
+    private TextView editMaxTemp;
+    private String temperature = "0";
+    private String temperatureF = "0";
+    private String temperatureFRaw = "0";
+    private int maxTemp = 0;
+    private int minTemp = 0;
+    private boolean isTempSet = false;
     // BTLE state
     private BluetoothAdapter adapter;
     private BluetoothGatt gatt;
@@ -112,7 +110,12 @@ public class MainActivity extends Activity {
             super.onCharacteristicChanged(gatt, characteristic);
             writeLine("Received: " + characteristic.getStringValue(0));
             temperature = characteristic.getStringValue(0) + " C";
+            temperatureFRaw = cToF(characteristic.getStringValue(0));
             temperatureF = cToF(characteristic.getStringValue(0)) + " F";
+            if(!isTempSet){
+                maxTemp = Integer.valueOf(temperatureFRaw);
+                minTemp = Integer.valueOf(temperatureFRaw);
+            }
 
         }
     };
@@ -143,16 +146,26 @@ public class MainActivity extends Activity {
 
         // Grab references to UI elements.
         messages = (TextView) findViewById(R.id.messages);
-        input = (EditText) findViewById(R.id.input);
         displayTemp = (TextView)findViewById(R.id.temperature);
         displayTempF = (TextView)findViewById(R.id.temperatureF);
         reconnectButton = (Button) findViewById(R.id.reconnect);
+        resetButton = (Button) findViewById(R.id.resetTemp);
         adapter = BluetoothAdapter.getDefaultAdapter();
+        editMaxTemp = (TextView)findViewById(R.id.maxTemp);
+        editMinTemp = (TextView)findViewById(R.id.minTemp);
 
         reconnectButton.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
                         onResume();
+                    }
+                }
+        );
+
+        reconnectButton.setOnClickListener(
+                new Button.OnClickListener() {
+                    public void onClick(View v) {
+                        resetTemp();
                     }
                 }
         );
@@ -182,21 +195,15 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void resetTemp(){
+        isTempSet = false;
+    }
+
     // Handler for mouse click on the send button.
     public void sendClick(View view) {
-        String message = input.getText().toString();
-        if (tx == null || message == null || message.isEmpty()) {
-            // Do nothing if there is no device or message to send.
-            return;
-        }
-        // Update TX characteristic value.  Note the setValue overload that takes a byte array must be used.
-        tx.setValue(message.getBytes(Charset.forName("UTF-8")));
-        if (gatt.writeCharacteristic(tx)) {
-            writeLine("Sent: " + message);
-        }
-        else {
-            writeLine("Couldn't write TX characteristic!");
-        }
+        isTempSet = true;
+        maxTemp = Integer.valueOf(editMaxTemp.getText().toString());
+        minTemp = Integer.valueOf(editMinTemp.getText().toString());
     }
 
     // Write some text to the messages text view.
@@ -210,6 +217,21 @@ public class MainActivity extends Activity {
                 messages.append("\n");
                 displayTemp.setText(temperature);
                 displayTempF.setText(temperatureF);
+                if(Integer.valueOf(temperatureFRaw) < minTemp ){
+                    displayTempF.setTextColor(Color.BLUE);
+                    displayTemp.setTextColor(Color.BLUE);
+
+                    // Vibrate for 500 milliseconds
+                    //v.vibrate(500);
+                }
+                else if(Integer.valueOf(temperatureFRaw) > maxTemp ){
+                    displayTempF.setTextColor(Color.RED);
+                    displayTemp.setTextColor(Color.RED );
+                }
+                else {
+                    displayTempF.setTextColor(Color.BLACK);
+                    displayTemp.setTextColor(Color.BLACK);
+                }
             }
         });
     }

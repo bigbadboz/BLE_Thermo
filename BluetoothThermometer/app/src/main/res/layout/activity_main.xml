@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -14,9 +15,9 @@
         android:layout_height="wrap_content"
         android:text="Set"
         android:onClick="sendClick"
-        android:layout_marginTop="19dp"
-        android:layout_below="@+id/input"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/maxTemp"
+        android:layout_alignStart="@+id/maxTemp" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -48,13 +49,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:id="@+id/input"
-        android:hint="Optimum Temperature"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:id="@+id/maxTemp"
+        android:hint="Max Temp(F)"
         android:numeric="signed|integer"
         android:autoText="true"
-        android:maxLength="4" />
+        android:maxLength="4"
+        android:layout_alignBottom="@+id/minTemp"/>
+
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:id="@+id/minTemp"
+        android:hint="Min Temp(F)"
+        android:numeric="signed|integer"
+        android:autoText="true"
+        android:maxLength="4"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/resetTemp"
+        android:layout_marginTop="10dp" />
+
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -63,8 +78,7 @@
         android:text="Reconnect"
         android:id="@+id/reconnect"
         android:layout_above="@+id/scrollView"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/send" />
+        android:layout_alignEnd="@+id/send" />
 
 
     <TextView
@@ -72,12 +86,24 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="F"
-        android:textSize="60sp"
+        android:textSize="90sp"
         android:id="@+id/temperatureF"
         android:layout_marginTop="24dp"
         android:layout_below="@+id/temperature"
         android:layout_centerHorizontal="true"
         android:layout_alignEnd="@+id/temperature" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset"
+        android:id="@+id/resetTemp"
+
+        android:layout_above="@+id/temperature"
+        android:layout_alignEnd="@+id/maxTemp" />
+
+
 
 
 </RelativeLayout>
