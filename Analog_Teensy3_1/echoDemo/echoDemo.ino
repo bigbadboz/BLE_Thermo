@@ -1,28 +1,7 @@
-/*********************************************************************
-This is an example for our nRF8001 Bluetooth Low Energy Breakout
-
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/products/1697
-
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
-
-Written by Kevin Townsend/KTOWN  for Adafruit Industries.
-MIT license, check LICENSE for more information
-All text above, and the splash screen below must be included in any redistribution
-*********************************************************************/
-
-// This version uses the internal data queing so you can treat it like Serial (kinda)!
-
 #include <SPI.h>
 #include <Adafruit_BLE_UART.h>
 #include <Snooze.h>
 #include <Metro.h> 
-
-
-
-/*** Must be global ***/
 
 float tempNow = 0;
 float tempSensor = 0;
@@ -61,7 +40,6 @@ void setup(void)
   pinMode(3,INPUT);
   config.pinMode(3,INPUT_PULLUP,RISING);
   BTLEserial.begin();
-  //config.setTimer(5000);
 
   // //Get the radio advertising before we sleep
   while (status != ACI_EVT_DEVICE_STARTED) {
@@ -101,7 +79,7 @@ void loop()
       if (digitalRead(3) == HIGH) {
       //Serial1.println("SLEEP_started");
       //Serial1.flush();
-      //Snooze.sleep(config);
+      Snooze.sleep(config);
       //Serial1.println("WAKE_started");
       }
   
@@ -123,33 +101,11 @@ void loop()
       // Serial1.println("WAKE_disconnected");
     //}
     }
-    // OK set the last status change to this one
     laststatus = status;
   }
 
   if (status == ACI_EVT_CONNECTED) {
-    // Lets see if there's any data for us!
-    // OK while we still have something to read, get a character and print it out
     int i = 0;
-    while (BTLEserial.available()) {
-      char c = BTLEserial.read();
-      if(c = '-'){
-         readIsNegative = 1;     
-      }
-      else{
-        readBuffer[i] = c;
-        i++;
-      }
-    }
-
-    if(readIsNegative){
-      tempOptimal = -1 * ( (readBuffer[0] - '0') * 100 + ( readBuffer[1] - '0') * 10 + ( readBuffer[2] - '0') );
-    }
-    else{
-      tempOptimal = ( (readBuffer[0] - '0') * 100 + ( readBuffer[1] - '0') * 10 + ( readBuffer[2] - '0') );
-    }
-
-    //Serial.print(tempOptimal);
     if (serialMetro.check() == 1) { 
       isNegative = 0;
       tempSensor = analogRead(A0);
