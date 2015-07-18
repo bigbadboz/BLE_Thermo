@@ -2,6 +2,7 @@
 #include <Adafruit_BLE_UART.h>
 #include <Snooze.h>
 #include <Metro.h> 
+#include <ADC.h>
 
 float tempNow = 0;
 float tempSensor = 0;
@@ -9,11 +10,9 @@ int isNegative = 0;
 int readIsNegative = 0;
 String s;
 SnoozeBlock config;
-int tempOptimal = 0;
-int temptooLow = tempOptimal - 50 ;
-int temptooHigh = tempOptimal + 50;
 Metro serialMetro = Metro(1000);
-char readBuffer[3];
+ADC *adc = new ADC(); // adc object;
+
 // Connect CLK/MISO/MOSI to hardware SPI
 // e.g. On UNO & compatible: CLK = 13, MISO = 12, MOSI = 11
 #define ADAFRUITBLE_REQ 10
@@ -30,27 +29,14 @@ aci_evt_opcode_t status;
     /**************************************************************************/
 void setup(void)
 { 
-  
-  //Serial1.begin(9600);
-  //while(!Serial); // Leonardo/Micro should wait for serial init
-  //Serial1.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
+  //Serial.println(F("Adafruit Bluefruit Low Energy nRF8001 Print echo demo"));
+  pinMode(A0, INPUT); //pin 23 single ended
+  adc->setAveraging(4); // set number of averages
+  adc->setResolution(10); // set bits of resolution
+  adc->setConversionSpeed(ADC_LOW_SPEED); // change the conversion speed
+  BTLEserial.setDeviceName("BBQHAN"); /* 7 characters max! */
 
-  BTLEserial.setDeviceName("BBQTemp"); /* 7 characters max! */
-
-  pinMode(3,INPUT);
-  config.pinMode(3,INPUT_PULLUP,RISING);
-  BTLEserial.begin();
-
-  // //Get the radio advertising before we sleep
-  while (status != ACI_EVT_DEVICE_STARTED) {
-   status = BTLEserial.getState();
-   BTLEserial.pollACI();
-   
-  }
-  Serial1.println("BLE started");
-  tempOptimal = analogRead(A0) * (3.3 / 1023.0);
-  tempOptimal = ((tempOptimal - 1.25) / 0.005 ) ;
-  
+  BTLEserial.begin();  
 }
 
 /**************************************************************************/
@@ -62,8 +48,7 @@ aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
 void loop()
 { 
-
-  //int tempJustRight = 0; 
+  //Serial.println( ( adc->analogRead(A0) ) *3.3/adc->getMaxValue(ADC_0), DEC);
   isNegative = 0;
 
   // Tell the nRF8001 to do whatever it should be working on.
@@ -73,34 +58,6 @@ void loop()
   status = BTLEserial.getState();
   // If the status changed....
   if (status != laststatus) {
-    // print it out!s
-    if (status == ACI_EVT_DEVICE_STARTED) {
-      Serial1.println(F("* Advertising started"));
-      if (digitalRead(3) == HIGH) {
-      //Serial1.println("SLEEP_started");
-      //Serial1.flush();
-      Snooze.sleep(config);
-      //Serial1.println("WAKE_started");
-      }
-  
-      //Serial.println(F("*sleeping"));
-      //Snooze.sleep(config);
-      //Serial.println(F("awake"));
-
-    }
-    if (status == ACI_EVT_CONNECTED) {
-      //Serial1.println(F("* Connected!"));
-    }
-    if (status == ACI_EVT_DISCONNECTED) {
-     // Serial1.println(F("* Disconnected or advertising timed out"));
-      
-     // if (digitalRead(3) == HIGH) {
-      // Serial1.println("SLEEP_Disconnected");
-      // Serial1.flush();
-      // Snooze.sleep(config);
-      // Serial1.println("WAKE_disconnected");
-    //}
-    }
     laststatus = status;
   }
 
@@ -108,16 +65,15 @@ void loop()
     int i = 0;
     if (serialMetro.check() == 1) { 
       isNegative = 0;
-      tempSensor = analogRead(A0);
-      tempSensor = analogRead(A0) * (3.3 / 1023.0);
-      tempNow = ( (tempSensor - 1.25) / 0.005 );
+      tempSensor = adc->analogRead(A0)  * (3.3/adc->getMaxValue(ADC_0));
+      tempNow = ( (tempSensor - 1.25) / 0.005 ) - 6;
       if(tempNow < 0.0){
         isNegative = 1;
         tempNow = abs(tempNow);
       } 
 
       char buffer[5];
-      unsigned char sendbuffer[10];
+      unsigned char sendbuffer[5];
       s = dtostrf(tempNow,4,1,buffer);
       if(isNegative){
         s = "-" + s;

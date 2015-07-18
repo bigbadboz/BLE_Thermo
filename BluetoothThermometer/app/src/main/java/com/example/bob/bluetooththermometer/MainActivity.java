@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.os.Vibrator;
+import android.widget.ListView;
 public class MainActivity extends Activity {
 
     // UUIDs for UAT service and associated characteristics.
