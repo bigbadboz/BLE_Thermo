@@ -240,6 +240,11 @@ public class MainActivity extends Activity {
                     displayTempF.setTextColor(Color.BLACK);
                     displayTemp.setTextColor(Color.BLACK);
                 }
+
+                else{
+                    displayTempF.setTextColor(Color.BLACK);
+                    displayTemp.setTextColor(Color.BLACK);
+                }
             }
         });
     }
